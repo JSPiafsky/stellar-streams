@@ -4,7 +4,7 @@ import pytest
 
 matplotlib.use("Agg")  # Use non-interactive backend for testing
 
-from src.stellar_stream.stream import StellarStream
+from stellar_stream import StellarStream
 
 
 # ----------------------------
