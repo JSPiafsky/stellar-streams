@@ -7,3 +7,4 @@ src/stellar_stream.egg-info/SOURCES.txt
 src/stellar_stream.egg-info/dependency_links.txt
 src/stellar_stream.egg-info/requires.txt
 src/stellar_stream.egg-info/top_level.txt
+tests/test_stellar_stream.py
