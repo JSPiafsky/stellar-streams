@@ -10,6 +10,7 @@ from celerite2 import GaussianProcess, terms
 from scipy.ndimage import gaussian_filter1d
 from scipy.optimize import minimize
 from scipy.signal import periodogram, welch
+from scipy.stats import sigmaclip
 
 
 class hybridmethod:
