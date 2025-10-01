@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "stellar-stream"
+version = "0.0.1"
+authors = [{name = "Jake Piafsky", email = "jake.piafsky@mail.utoronto.ca"}]
+description = "A package to handle and analyze data from stellar streams"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "numpy",
+    "scipy",
+    "matplotlib",
+    "astropy",
+    "pandas",
+    "gala",
+    "celerite2",
+]

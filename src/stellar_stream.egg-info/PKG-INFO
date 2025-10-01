@@ -1,0 +1,27 @@
+Metadata-Version: 2.4
+Name: stellar-stream
+Version: 0.0.1
+Summary: A package to handle and analyze data from stellar streams
+Author-email: Jake Piafsky <jake.piafsky@mail.utoronto.ca>
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+Requires-Dist: numpy
+Requires-Dist: scipy
+Requires-Dist: matplotlib
+Requires-Dist: astropy
+Requires-Dist: pandas
+Requires-Dist: gala
+Requires-Dist: celerite2
+
+# Substructure In Stellar Streams
+
+Research project trying to quantify how much structure is present in stellar streams at different scales.
+
+## Quickstart
+
+```bash
+# create venv and install
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+pip install -e .
