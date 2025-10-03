@@ -1,5 +1,14 @@
-# src/stellar_stream/__init__.py
-"""stellar_stream package - small wrapper to expose core API."""
-from .stream import StellarStream  # adapt if class name differs
+"""
+Stellar Stream Analysis Package
+=====
+
+Provides
+  1. Tools for analyzing stellar streams in astrophysics
+  2. Detrending and signal processing utilities
+  3. Visualization tools for stream data
+
+"""
+
+from .stream import StellarStream
 
 __all__ = ["StellarStream"]

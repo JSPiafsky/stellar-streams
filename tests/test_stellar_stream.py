@@ -12,9 +12,10 @@ from stellar_stream.stream import StellarStream
 # ----------------------------
 @pytest.fixture
 def simple_stream():
-    phi1 = np.linspace(0, 10, 100)
-    phi2 = np.sin(phi1)
-    vlos = phi2 + np.random.normal(0, 0.1, size=phi2.shape)
+    size = 500
+    phi1 = np.random.normal(0, 1, size)
+    phi2 = np.random.normal(0, 5, size)
+    vlos = np.random.normal(0, 0.1, size)
     return StellarStream(phi1, phi2, vlos, name="SimpleStream")
 
 
@@ -135,7 +136,3 @@ def test_plot_density(simple_stream):
 
 def test_plot_power_spectrum(simple_stream):
     StellarStream.plot_power_spectrum(simple_stream)
-
-
-def test_plot_power_spectrum_denoised(simple_stream):
-    StellarStream.plot_power_spectrum_denoised(simple_stream)

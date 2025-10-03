@@ -1,6 +1,7 @@
 README.md
 pyproject.toml
 src/stellar_stream/__init__.py
+src/stellar_stream/hybridMethod.py
 src/stellar_stream/stream.py
 src/stellar_stream.egg-info/PKG-INFO
 src/stellar_stream.egg-info/SOURCES.txt

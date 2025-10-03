@@ -9,27 +9,12 @@ from astropy.coordinates import SkyCoord
 from celerite2 import GaussianProcess, terms
 from scipy.ndimage import gaussian_filter1d
 from scipy.optimize import minimize
-from scipy.signal import periodogram, welch
+from scipy.signal import periodogram
 from scipy.stats import sigmaclip
 
+from .hybrid import hybridmethod
 
-class hybridmethod:
-    def __init__(self, func):
-        self.func = func
-
-    def __get__(self, obj, cls=None):
-        """
-        When accessed as C.foo, obj is None and cls is the class C.
-        When accessed as c.foo, obj is the instance c and cls is C.
-        We wrap self.func in a closure so that calling it always
-        injects the correct first argument.
-        """
-        first = obj if obj is not None else cls
-
-        def wrapper(*args, **kwargs):
-            return self.func(first, *args, **kwargs)
-
-        return wrapper
+"""StellarStream class for analyzing stellar streams."""
 
 
 @dataclass
@@ -81,8 +66,6 @@ class StellarStream:
 
         stream_displacements = sim_data["rs3"]
         stream_velocities = sim_data["vs3"]
-        # stream_core_displacements = sim_data['rc3'] May be implemented later
-        # stream_core_velocities = sim_data['vc3']
 
         ### Convert the stream data to Galactic coordinates
         simulation_galactic_coordinates = SkyCoord(
@@ -379,96 +362,6 @@ class StellarStream:
             self._cache[key] = (freqs, ps)
         return self._cache[key]
 
-    def power_spectrum_denoised(
-        self,
-        precision: float = 1.0,
-        bins: int = 256,
-        use_bins: bool = False,
-        tukey_alpha: float = 0.25,
-        n_segments: int = 6,
-        overlap: float = 0.5,
-        subtract_highk_floor: bool = True,
-        **kwargs,
-    ):
-        """
-        Compute a denoised 1D power spectrum of the stream density.
-
-        Parameters
-        ----------
-        precision : float
-            Bin width in degrees (if use_bins=False).
-        bins : int
-            Number of bins (if use_bins=True).
-        use_bins : bool
-            If True, 'bins' sets the number of bins instead of precision.
-        detrend : str
-            Detrending method: "none", "poly2", "poly3".
-        window : str
-            Window to reduce edge leakage: "tukey", "hann".
-        tukey_alpha : float
-            Alpha parameter for Tukey window.
-        method : str
-            Spectrum method: "fft" (single segment) or "welch" (averaged).
-        n_segments : int
-            Number of segments for Welch method.
-        overlap : float
-            Fractional overlap for Welch (0–1).
-        subtract_highk_floor : bool
-            If True, subtract empirical white-noise floor at high frequencies.
-
-        Returns
-        -------
-        f : ndarray
-            Frequencies in cycles per degree.
-        ps : ndarray
-            Power spectral density.
-        """
-
-        if not use_bins:
-            bins = self.degrees_to_bins(precision)
-
-        # --- caching key
-        key = (
-            "ps_denoised",
-            precision,
-            bins,
-            use_bins,
-            tukey_alpha,
-            n_segments,
-            overlap,
-            subtract_highk_floor,
-        )
-        if key in self._cache:
-            return self._cache[key]
-
-        x, dens = self.density_phi1(bins=bins, **kwargs)
-        fs = 1.0 / (x[1] - x[0])
-
-        nperseg = int(np.floor(len(x) / (1 + (1 - overlap) * (n_segments - 1))))
-        nperseg = max(nperseg, 32)
-        noverlap = int(overlap * nperseg)
-        freqs, ps = welch(
-            dens,
-            fs=fs,
-            window=("tukey", tukey_alpha),
-            nperseg=nperseg,
-            noverlap=noverlap,
-            detrend=False,
-            return_onesided=True,
-            scaling="density",
-        )
-
-        # --- subtract white noise floor
-        if subtract_highk_floor:
-            hi = freqs > 0.7 * np.max(freqs)
-            if np.any(hi):
-                floor = np.median(ps[hi])
-                ps = np.clip(ps - floor, a_min=0.0, a_max=None)
-
-        self._cache[key] = (freqs, ps)
-
-        return freqs, ps
-
     # --- Plotting utilities -----------------------------------------
     def plot_stream(self, ax=None):
         """Simple φ₂ vs φ₁ + vlos vs φ₁ plot."""
@@ -552,41 +445,6 @@ class StellarStream:
             plt.xlabel("Frequency (1/deg)")
             plt.ylabel("Power")
             plt.title(f"Power Spectrum of {self_or_cls.name}")
-
-    @hybridmethod
-    def plot_power_spectrum_denoised(self_or_cls, *streams, **kwargs):
-        """
-        Plot power spectrum for multiple StellarStream instances if called from the class,
-        or for a single instance if called from an instance.
-        """
-        if isinstance(self_or_cls, type):
-            if not streams:
-                raise ValueError(
-                    "You must provide at least one StellarStream instance."
-                )
-
-            plt.figure()
-            for stream in streams:
-                if not isinstance(stream, StellarStream):
-                    raise TypeError(
-                        f"Expected StellarStream instance, got {type(stream)}"
-                    )
-                freqs, ps = stream.power_spectrum_denoised(**kwargs)
-                plt.loglog(
-                    freqs[1:], ps[1:], label=f"Stream {stream.name}"
-                )  # Zero freq skews log graphx
-            plt.xlabel("Frequency (1/deg)")
-            plt.ylabel("Power")
-            plt.legend()
-            plt.title("Denoised Power Spectrum of Multiple Stellar Streams")
-            plt.show()
-        else:
-            freqs, ps = self_or_cls.power_spectrum_denoised(**kwargs)
-            plt.figure()
-            plt.loglog(freqs[1:], ps[1:])  # Zero freq skews log graph
-            plt.xlabel("Frequency (1/deg)")
-            plt.ylabel("Power")
-            plt.title(f"Denoised Power Spectrum of {self_or_cls.name}")
 
 
 # --- Class-level criteria for selection ---------------------------
