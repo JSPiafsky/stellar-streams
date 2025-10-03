@@ -382,6 +382,7 @@ class StellarStream:
         Plot density for multiple StellarStream instances if called from the class,
         or for a single instance if called from an instance.
         """
+
         if isinstance(self_or_cls, type):
             if not streams:
                 raise ValueError(
@@ -398,6 +399,7 @@ class StellarStream:
                 plt.plot(x, y, label=f"Stream {stream.name}")
             plt.xlabel(r"$\phi_1$ [deg]")
             plt.ylabel("Density (stars/deg)")
+            plt.ylim(bottom=0)
             plt.legend()
             plt.title("Density of Multiple Stellar Streams")
             plt.show()
@@ -408,6 +410,7 @@ class StellarStream:
             plt.xlabel(r"$\phi_1$ [deg]")
             plt.ylabel("Density (stars/deg)")
             plt.title(f"Density of Stellar Stream {self_or_cls.name}")
+            plt.ylim(bottom=0)
             plt.legend()
             plt.show()
 
@@ -445,6 +448,27 @@ class StellarStream:
             plt.xlabel("Frequency (1/deg)")
             plt.ylabel("Power")
             plt.title(f"Power Spectrum of {self_or_cls.name}")
+
+    def plot_power_and_density(self, precision=1.0):
+        """Plot both the density and power spectrum side by side."""
+        fig, ax = plt.subplots(1, 2, figsize=(12, 5))
+
+        fig.suptitle(self.name)
+
+        x, dens = self.density_phi1(precision=precision)
+        ax[0].plot(x, dens)
+        ax[0].set_xlabel(r"$\phi_1$ [deg]")
+        ax[0].set_ylabel("Density (stars/deg)")
+        ax[0].set_title("Density")
+
+        freqs, ps = self.power_spectrum(precision=precision)
+        ax[1].loglog(freqs[1:], ps[1:])  # Zero freq skews log graph
+        ax[1].set_xlabel("Frequency (1/deg)")
+        ax[1].set_ylabel("Power")
+        ax[1].set_title("Power Spectrum")
+
+        plt.tight_layout()
+        return fig, ax
 
 
 # --- Class-level criteria for selection ---------------------------
